@@ -1,5 +1,5 @@
 import datetime
-from sqlalchemy import MetaData, Table, Column, String, Date, Integer, Float
+from sqlalchemy import MetaData, Table, Column, String, Date, Integer, Float, TIMESTAMP, func
 from sqlalchemy.orm import declared_attr, Mapped
 from database_client import database_client
 
@@ -33,3 +33,12 @@ class LoanData(database_client.Base, TableMixin):
     purpose = Column('purpose', String(255), nullable=True)
     hardship_flag = Column('hardship_flag', String(255), nullable=True)
     pymnt_plan = Column('pymnt_plan', String(255), nullable=True)
+
+
+class PredLoanData(database_client.Base, TableMixin):
+    __tablename__ = "pred_loan_data"
+
+    loan_data_id = Column('loan_data_id', Float)
+    prediction = Column('prediction', String(255), nullable=True)
+    created_at = Column(name="created_at", type_=TIMESTAMP, nullable=True, unique=False, default=func.now())
+    

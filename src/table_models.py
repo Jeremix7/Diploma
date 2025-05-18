@@ -34,7 +34,7 @@ class LoanData(database_client.Base, TableMixin):
     hardship_flag = Column('hardship_flag', String(255), nullable=True)
     pymnt_plan = Column('pymnt_plan', String(255), nullable=True)
 
-
+# ------------------- Table pred_loan_data -------------------
 class PredLoanData(database_client.Base, TableMixin):
     __tablename__ = "pred_loan_data"
 

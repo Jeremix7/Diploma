@@ -34,44 +34,55 @@ def credit_scoring_pipeline():
 
     @task
     def create_spark():
+        logger.info("Creating Spark session.")
         from src.functions import create_spark_client
-
-        return create_spark_client()
+        spark = create_spark_client()
+        logger.info("Spark session successfully created.")
+        return spark
 
     @task
     def extract_data(spark):
+        logger.info("Getting data from the database.")
         from src.functions import get_data_from_db
         from src.table_models import LoanData
-
-        return get_data_from_db(LoanData)
+        df = get_data_from_db(LoanData)
+        logger.info(f"Data successfully extracted from DB.")
+        return df
 
     @task
     def transform_data(spark, df):
+        logger.info("Transforming data for model.")
         from src.functions import transform_data_for_model
-
-        return transform_data_for_model(spark, df)
+        transformed_df = transform_data_for_model(spark, df)
+        logger.info("Data transformation complete.")
+        return transformed_df
 
     @task
     def load_model_and_predict(transformed_data):
+        logger.info("Loading model and generating predictions.")
         from pyspark.ml.classification import LogisticRegressionModel
 
         model_save_path = "/opt/airflow/models/logistic_regression_model"
         loaded_model = LogisticRegressionModel.load(model_save_path)
         predictions = loaded_model.transform(transformed_data)
-        return predictions.select("id", "prediction").toPandas()
+        pandas_df = predictions.select("id", "prediction").toPandas()
+        logger.info(f"Predictions complete. {len(pandas_df)} rows predicted.")
+        return pandas_df
 
     @task
     def save_results(predictions_df):
+        logger.info("Saving predictions to DB.")
         from src.functions import save_data_to_db
         from src.table_models import PredLoanData
 
         save_data_to_db(PredLoanData, predictions_df)
+        logger.info("Predictions successfully saved.")
 
     @task
     def close_spark(spark):
         spark.stop()
+        logger.info("Spark session stopped.")
 
-    # Поток выполнения задач
     spark_session = create_spark()
     data_df = extract_data(spark_session)
     transformed_df = transform_data(spark_session, data_df)
@@ -79,7 +90,6 @@ def credit_scoring_pipeline():
     save_task = save_results(predictions_df)
     stop_spark = close_spark(spark_session)
 
-    # Устанавливаем зависимости
     (
         spark_session
         >> data_df

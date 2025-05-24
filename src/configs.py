@@ -8,10 +8,6 @@ except:
 from pydantic_settings import BaseSettings
 
 
-# root_directory = os.path.dirname(os.path.abspath(__file__))
-# parent_directory = os.path.dirname(root_directory)
-# sys.path.append(root_directory)
-# sys.path.append('/opt/airflow/dags/mielo.git/configured_info_parser_dag_mongo')
 class Settings(BaseSettings):
     """Base settings."""
     DAG_NAME: str = 'credit_scoring'

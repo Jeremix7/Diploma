@@ -32,42 +32,24 @@ def spark_df_to_pandas_df(spark_df):
 
 def insert_values_into_table(df):
     with database_client.engine.connect() as connection:
-        # Преобразуем DataFrame в список словарей
         records = df.to_dict("records")
 
-        # Выполняем вставку (id будет генерироваться автоматически)
         connection.execute(insert(LoanData), records)
 
 
 def get_data_from_db(table_model):
-    # with database_client.engine.connect() as connection:
-    #     query = text(f"SELECT * FROM {table_model.__tablename__} WHERE issue_d = :date LIMIT :limit")
-
-    #     # Выполнение запроса с параметрами
-    #     result = connection.execute(
-    #         query,
-    #         {'date': date, 'limit': num_rows}
-    #     )
-
-    #     rows = result.fetchall()
-    #     columns = result.keys()
-    #     return pd.DataFrame(rows, columns=columns)
     with database_client.engine.connect() as connection:
-        # Сначала получаем все данные для указанной даты
         query = text(f"SELECT * FROM {table_model.__tablename__}")
         result = connection.execute(query)
 
         rows = result.fetchall()
         columns = result.keys()
 
-        # Если данных нет, возвращаем пустой DataFrame
         if not rows:
             return pd.DataFrame(columns=columns)
 
-        # Определяем случайное количество строк для возврата (от 40 до 200)
         num_rows = random.randint(40, 200)
 
-        # Выбираем случайные строки
         random_rows = random.sample(rows, num_rows)
 
         return pd.DataFrame(random_rows, columns=columns)
@@ -82,24 +64,19 @@ def save_data_to_db(table_model, df):
     df["created_at"] = datetime.now()
 
     with database_client.engine.connect() as connection:
-        # Получаем имя таблицы из модели
         table_name = table_model.__tablename__
 
-        # Подготавливаем имена колонок
         columns = df.columns.tolist()
         print("\n", columns, "\n")
         columns_str = ", ".join(columns)
 
-        # Создаем SQL-запрос с параметрами
         query = text(
             f"INSERT INTO {table_name} ({columns_str}) VALUES "
             f"({', '.join([f':{col}' for col in columns])})"
         )
 
-        # Конвертируем DataFrame в список словарей
         data = df.to_dict(orient="records")
 
-        # Выполняем запрос для всех строк
         connection.execute(query, data)
 
 

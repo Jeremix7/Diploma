@@ -83,11 +83,19 @@ def credit_scoring_pipeline():
         spark.stop()
         logger.info("Spark session stopped.")
 
+    @task
+    def update_materialized_view():
+        logger.info("Refreshing materialized view.")
+        from src.functions import refresh_materialized_view
+        refresh_materialized_view("loan_data_with_predictions_mv")
+        logger.info("Materialized view successfully refreshed.")
+
     spark_session = create_spark()
     data_df = extract_data(spark_session)
     transformed_df = transform_data(spark_session, data_df)
     predictions_df = load_model_and_predict(transformed_df)
     save_task = save_results(predictions_df)
+    refresh_mv = update_materialized_view()
     stop_spark = close_spark(spark_session)
 
     (
@@ -96,6 +104,7 @@ def credit_scoring_pipeline():
         >> transformed_df
         >> predictions_df
         >> save_task
+        >> refresh_mv
         >> stop_spark
     )
 

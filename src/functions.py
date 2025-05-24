@@ -126,6 +126,10 @@ def transform_data_for_model(spark, df):
 def load_model(model_save_path, model):
     return model.load(model_save_path)
 
+def refresh_materialized_view(view_name):
+    with database_client.engine.connect() as connection:
+        query = text(f"REFRESH MATERIALIZED VIEW {view_name}")
+        connection.execute(query)
 
 if __name__ == "__main__":
     spark = create_spark_client()

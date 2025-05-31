@@ -1,7 +1,6 @@
-import datetime
 from sqlalchemy import MetaData, Table, Column, String, Date, Integer, Float, TIMESTAMP, func
 from sqlalchemy.orm import declared_attr, Mapped
-from database_client import database_client
+from src.database_client import database_client
 
 class TableMixin(object):
     @declared_attr

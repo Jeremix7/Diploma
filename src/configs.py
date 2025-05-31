@@ -20,6 +20,7 @@ class Settings(BaseSettings):
     POSTGRES_APP_NAME: str = DAG_NAME
 
     class Config:
+        env_file = ".env"
         env_file_encoding = 'utf-8'
 
   

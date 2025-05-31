@@ -1,9 +1,9 @@
-from configs import settings
+from src.configs import settings
 from datetime import datetime
-from database_client import database_client
+from src.database_client import database_client
 from sqlalchemy import insert, text
 from pyspark.sql import SparkSession
-from table_models import LoanData, PredLoanData
+from src.table_models import LoanData, PredLoanData
 import random
 import pandas as pd
 import numpy as np

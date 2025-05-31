@@ -1,0 +1,12 @@
+__pycache__/
+.ipynb_checkpoints/
+*.pyc
+*.pyo
+*.log
+*.tmp
+venv/
+env/
+model/
+notebooks/
+tests/
+README.md

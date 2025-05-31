@@ -1,7 +1,4 @@
-"""
-Модуль подключения к базе данных postgres
-"""
-from configs import settings
+from src.configs import settings
 from sqlalchemy.orm import declarative_base
 
 

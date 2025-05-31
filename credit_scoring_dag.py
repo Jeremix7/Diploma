@@ -33,19 +33,38 @@ default_args = {
 def credit_scoring_pipeline():
 
     @task
+    def produce_to_kafka():
+        logger.info("Producing requests to Kafka.")
+        from src.kafka.producer import send_loan_requests
+
+        send_loan_requests()
+        logger.info("Kafka messages sent.")
+
+    @task
+    def read_data_from_kafka():
+        logger.info("Reading IDs from Kafka.")
+        from src.kafka.consumer import get_kafka_data
+
+        ids = get_kafka_data()
+        logger.info(f"Read {len(ids)} IDs from Kafka.")
+        return ids
+
+    @task
     def create_spark():
         logger.info("Creating Spark session.")
         from src.functions import create_spark_client
+
         spark = create_spark_client()
         logger.info("Spark session successfully created.")
         return spark
 
     @task
-    def extract_data(spark):
+    def extract_data(ids_data):
         logger.info("Getting data from the database.")
         from src.functions import get_data_from_db
         from src.table_models import LoanData
-        df = get_data_from_db(LoanData)
+
+        df = get_data_from_db(LoanData, ids_data)
         logger.info(f"Data successfully extracted from DB.")
         return df
 
@@ -53,6 +72,7 @@ def credit_scoring_pipeline():
     def transform_data(spark, df):
         logger.info("Transforming data for model.")
         from src.functions import transform_data_for_model
+
         transformed_df = transform_data_for_model(spark, df)
         logger.info("Data transformation complete.")
         return transformed_df
@@ -87,20 +107,25 @@ def credit_scoring_pipeline():
     def update_materialized_view():
         logger.info("Refreshing materialized view.")
         from src.functions import refresh_materialized_view
+
         refresh_materialized_view("loan_data_with_predictions_mv")
         logger.info("Materialized view successfully refreshed.")
 
-    spark_session = create_spark()
-    data_df = extract_data(spark_session)
-    transformed_df = transform_data(spark_session, data_df)
+    produce = produce_to_kafka()
+    ids_data = read_data_from_kafka()
+    spark = create_spark()
+    df = extract_data(ids_data)
+    transformed_df = transform_data(spark, df)
     predictions_df = load_model_and_predict(transformed_df)
     save_task = save_results(predictions_df)
     refresh_mv = update_materialized_view()
-    stop_spark = close_spark(spark_session)
+    stop_spark = close_spark(spark)
 
     (
-        spark_session
-        >> data_df
+        produce
+        >> ids_data
+        >> spark
+        >> df
         >> transformed_df
         >> predictions_df
         >> save_task

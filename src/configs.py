@@ -1,6 +1,7 @@
 import logging
-import sys,os
+import sys, os
 from typing import Union
+
 try:
     from airflow.models import Variable
 except:
@@ -9,37 +10,49 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
-    """Base settings."""
-    DAG_NAME: str = 'credit_scoring'
+    """
+    Base settings.
+    """
+
+    DAG_NAME: str = "credit_scoring"
     LOG_LEVEL: int = logging.INFO
 
     ENV_TYPE: str
-    
+
     # postgres
-    
+
     POSTGRES_APP_NAME: str = DAG_NAME
 
     class Config:
         env_file = ".env"
-        env_file_encoding = 'utf-8'
+        env_file_encoding = "utf-8"
 
-  
+
 class LocalSettings(Settings):
-    '''
-    Локальные настройки
-    '''
-    ENV_TYPE: str = 'local'
-    
+    """
+    Local settings
+    """
+
+    ENV_TYPE: str = "local"
+
     # postgres
-    POSTGRES_USER: str = 'user'
-    POSTGRES_PASSWORD: str = 'user'
-    POSTGRES_DB: str = 'user'
-    POSTGRES_SCHEMA: str = 'public'
-    POSTGRES_HOST: str = 'localhost'
+    POSTGRES_USER: str = "user"
+    POSTGRES_PASSWORD: str = "user"
+    POSTGRES_DB: str = "user"
+    POSTGRES_SCHEMA: str = "public"
+    POSTGRES_HOST: str = "localhost"
     POSTGRES_PORT: int = 5431
 
-   
+    # kafka
+    KAFKA_BROKER: str = "kafka:9092"
+    TOPIC_NAME: str = "loan_requests"
+    GROUP_ID: str = "credit_scoring_dag_consumer"
+
+
 def get_settings() -> Union[LocalSettings]:
+    """
+    Determine the current env settings and return configuration.
+    """
 
     try:
         env_type = Variable.get("stand_name")
@@ -48,16 +61,15 @@ def get_settings() -> Union[LocalSettings]:
         env_type = "local"
 
     # локальные заглушки
-    env_type = 'local'
+    env_type = "local"
     # env_type = 'dev'
-    print('====================================')
-    print(f'* Set stand to {env_type}')
-    print('====================================')
+    print("====================================")
+    print(f"* Set stand to {env_type}")
+    print("====================================")
 
-    config_cls_dict = {
-        'local': LocalSettings
-    }
+    config_cls_dict = {"local": LocalSettings}
     config_cls = config_cls_dict[env_type]
     return config_cls()
+
 
 settings = get_settings()

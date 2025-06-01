@@ -46,7 +46,7 @@ class LocalSettings(Settings):
     # kafka
     KAFKA_BROKER: str = "kafka:9092"
     TOPIC_NAME: str = "loan_requests"
-    GROUP_ID: str = "credit_scoring_dag_consumer"
+    GROUP_ID: str = "credit_scoring"
 
 
 def get_settings() -> Union[LocalSettings]:

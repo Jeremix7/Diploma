@@ -4,6 +4,8 @@ This project is a prototype of an automated data processing pipeline for credit 
 
 ## Architecture
 
+![Pipeline Architecture](https://github.com/Jeremix7/Diploma/blob/master/img/Architecture.png?raw=true)
+
 The system consists of the following components:
 
 - **PostgreSQL** – stores input customer data and model prediction results.
@@ -50,6 +52,8 @@ This will start:
 - Superset
 
 ## Monitoring
+
+![Dashboards](https://github.com/Jeremix7/Diploma/blob/master/img/Dashboard.jpg?raw=true)
 
 - Airflow Web UI shows DAG execution status, logs, task dependencies.
 - Superset provides dashboards and charts for tracking loan application scoring statistics.
